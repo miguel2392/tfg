@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="edit_message">Enter a message</string>
+    <string name="buttonA">Open activity A</string>
+    <string name="buttonB">Open activity B</string>
+    <string name="button3">FIND DEVICE</string>
+    <string name="button4">Start Advertising</string>
+    <string name="button5">Stop Advertising</string>
+
+
+</resources>
