@@ -16,7 +16,9 @@ import android.os.ParcelUuid;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 
+import java.nio.charset.Charset;
 import java.util.UUID;
 
 public class ActivityB extends AppCompatActivity {
@@ -24,6 +26,7 @@ public class ActivityB extends AppCompatActivity {
     private BluetoothAdapter bluetoothAdapter;
     private AdvertisingSet currentAdvertisingSet;
     static final int REQUEST_ENABLE_BT = 0;
+    private EditText nombre;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +49,8 @@ public class ActivityB extends AppCompatActivity {
             }
         });
 
+        nombre = findViewById(R.id.editText1);
+
         // Inicializacion Bluetooth Adapter
 
         final BluetoothManager bluetoothManager =
@@ -63,9 +68,10 @@ public class ActivityB extends AppCompatActivity {
 
     private void startAdvertising(){
 
-        bluetoothAdapter.setName("tortu");
+        bluetoothAdapter.setName(nombre.getText().toString());
 
         BluetoothLeAdvertiser advertiser = BluetoothAdapter.getDefaultAdapter().getBluetoothLeAdvertiser();
+
         AdvertisingSetParameters parameters = (new AdvertisingSetParameters.Builder())
                 .setLegacyMode(true) // True by default, but set here as a reminder.
                 .setConnectable(false).setScannable(true)
@@ -73,7 +79,27 @@ public class ActivityB extends AppCompatActivity {
                 .setTxPowerLevel(AdvertisingSetParameters.TX_POWER_MEDIUM)
                 .build();
 
-        AdvertiseData data = (new AdvertiseData.Builder()).setIncludeDeviceName(true).build();
+
+
+        ParcelUuid pUuid = new ParcelUuid( UUID.fromString( getString( R.string.ble_uuid ) ) );
+        //byte[] messageToSend = "Data".getBytes(Charset.forName("UTF-8"));
+        byte[] password = new byte[6];
+        password[0] =0;
+        password[1] =1;
+        password[2] =0;
+        password[3] =1;
+        password[4] =0;
+        password[5] =1;
+
+
+
+        AdvertiseData data = new AdvertiseData.Builder()
+                .setIncludeDeviceName(true)
+                .addServiceData(pUuid,password)
+                //.addServiceUuid(pUuid)
+                //.addManufacturerData(224,password)
+                .build();
+        //AdvertiseData data = (new AdvertiseData.Builder()).setIncludeDeviceName(true).build();
 
 
         advertiser.startAdvertisingSet(parameters, data, null, null, null, callback);
@@ -98,11 +124,6 @@ public class ActivityB extends AppCompatActivity {
     private void stopAdvertising(){
 
         BluetoothLeAdvertiser advertiser = BluetoothAdapter.getDefaultAdapter().getBluetoothLeAdvertiser();
-
-
-
-
-
         advertiser.stopAdvertisingSet(callback);
     }
 
