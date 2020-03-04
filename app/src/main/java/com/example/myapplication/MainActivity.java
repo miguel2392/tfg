@@ -11,13 +11,16 @@ import com.google.firebase.auth.FirebaseAuth;
 public class MainActivity extends AppCompatActivity {
 
     // Initialize Firebase Auth
-    private FirebaseAuth mAuth;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        if(FirebaseAuth.getInstance().getCurrentUser()==null){
+            openAuthenticationActivity(null);
+            finish();
+        }
 
     }
 
@@ -30,6 +33,12 @@ public class MainActivity extends AppCompatActivity {
         Intent intentB = new Intent(this, ActivityB.class);
         startActivity(intentB);
 
+    }
+
+    public void signOut (View view){
+        FirebaseAuth.getInstance().signOut();
+        openAuthenticationActivity(null);
+        finish();
     }
 
     public void openAuthenticationActivity (View view){

@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -79,6 +80,7 @@ public class AuthenticationActivity extends AppCompatActivity implements View.On
                                 Log.d(TAG, "createUserWithEmail:success");
                                 FirebaseUser user = mAuth.getCurrentUser();
                                 updateUI(user);
+                                openMainActivity();
                             } else {
                                 // If sign in fails, display a message to the user.
                                 Log.w(TAG, "createUserWithEmail:failure", task.getException());
@@ -113,6 +115,7 @@ public class AuthenticationActivity extends AppCompatActivity implements View.On
                                 Log.d(TAG, "signInWithEmail:success");
                                 FirebaseUser user = mAuth.getCurrentUser();
                                 updateUI(user);
+                                openMainActivity();
                             } else {
                                 // If sign in fails, display a message to the user.
                                 Log.w(TAG, "signInWithEmail:failure", task.getException());
@@ -243,6 +246,12 @@ public class AuthenticationActivity extends AppCompatActivity implements View.On
                 sendEmailVerification();
             }
         }
+
+        private void openMainActivity (){
+            Intent intentMain = new Intent(this, MainActivity.class);
+            startActivity(intentMain);
+            finish();
+         }
     }
 
 
