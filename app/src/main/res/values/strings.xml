@@ -3,9 +3,22 @@
     <string name="edit_message">Enter a message</string>
     <string name="buttonA">Open activity A</string>
     <string name="buttonB">Open activity B</string>
+    <string name="buttonC">Open Authentication Activity</string>
     <string name="button3">FIND DEVICE</string>
     <string name="button4">Start Advertising</string>
+    <string name="emailCreateAccountButton">Create Account</string>
+    <string name="signOutButton">Sign Out</string>
+    <string name="emailSignInButton">Sign In</string>
+    <string name="verifyEmailButton">Verify Email</string>
     <string name="button5">Stop Advertising</string>
     <string name="ble_uuid">CDB7950D-73F1-4D4D-8E47-C090502DBD63</string>
+    <string name="auth_failed">Authentication failed </string>
+    <string name="signed_out">Signed out </string>
+    <string name="emailpassword_status_fmt"> </string>
+    <string name="status">Status </string>
+    <string name="detail">Detail </string>
+    <string name="email">E-mail </string>
+    <string name="password">Password </string>
+
 
 </resources>

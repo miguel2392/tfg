@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,12 +18,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialize Firebase Auth
-        mAuth = FirebaseAuth.getInstance();
 
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        updateUI(currentUser);
     }
 
     public void openActivityA (View view){
@@ -35,6 +29,12 @@ public class MainActivity extends AppCompatActivity {
     public void openActivityB (View view){
         Intent intentB = new Intent(this, ActivityB.class);
         startActivity(intentB);
+
+    }
+
+    public void openAuthenticationActivity (View view){
+        Intent intentSignIn = new Intent(this, AuthenticationActivity.class);
+        startActivity(intentSignIn);
 
     }
 }
