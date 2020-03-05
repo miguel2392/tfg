@@ -1,12 +1,19 @@
 package com.example.myapplication;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -21,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
             openAuthenticationActivity(null);
             finish();
         }
+
+        startActivity(new Intent(this,DiferenciacionActivity.class));
 
     }
 
@@ -45,5 +54,23 @@ public class MainActivity extends AppCompatActivity {
         Intent intentSignIn = new Intent(this, AuthenticationActivity.class);
         startActivity(intentSignIn);
 
+    }
+
+    public void leerAsignatura (View view){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("asignaturas")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d("!!!", document.getId() + " => " + document.getData());
+                            }
+                        } else {
+                            Log.w("!!!", "Error getting documents.", task.getException());
+                        }
+                    }
+                });
     }
 }
