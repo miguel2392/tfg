@@ -17,6 +17,8 @@ public class AsignaturaItemView extends FrameLayout {
     private TextView alumnos;
 
     private Asignatura asignatura;
+    private AsignaturaClickListener asignaturaClickListener;
+
     public AsignaturaItemView(@NonNull Context context) {
         super(context);
         initialize(context);
@@ -40,6 +42,8 @@ public class AsignaturaItemView extends FrameLayout {
             @Override
             public void onClick(View v) {
                 Toast.makeText(getContext(), "on click", Toast.LENGTH_SHORT).show();
+                asignaturaClickListener.onAsignaturaClick(asignatura);
+                // TODO start PresentacionActivity pasando ID asignatura getContext()
             }
         });
     }
@@ -48,5 +52,9 @@ public class AsignaturaItemView extends FrameLayout {
         this.asignatura = asignatura;
         name.setText(asignatura.name);
         alumnos.setText(asignatura.getNumberOfAlumnos() + " alumnos");
+    }
+
+    public void setOnAsignaturaClickListener (AsignaturaClickListener asignaturaClickListener) {
+        this.asignaturaClickListener = asignaturaClickListener;
     }
 }

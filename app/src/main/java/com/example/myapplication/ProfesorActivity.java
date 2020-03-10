@@ -78,6 +78,13 @@ public class ProfesorActivity extends AppCompatActivity {
         for (Asignatura asignatura : asignaturas) {
             AsignaturaItemView itemView = new AsignaturaItemView(this);
             itemView.bindData(asignatura);
+            itemView.setOnAsignaturaClickListener(new AsignaturaClickListener() {
+                @Override
+                public void onAsignaturaClick(Asignatura asignatura) {
+                    // TODO escribir intent al nuevo presentacionactivity pasando ID asignatura como parámetro
+
+                }
+            });
             mainContainer.addView(itemView);
         }
     }
