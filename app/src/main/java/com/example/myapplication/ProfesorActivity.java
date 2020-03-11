@@ -33,6 +33,7 @@ public class ProfesorActivity extends AppCompatActivity {
 
     private LinearLayout mainContainer;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,7 +83,9 @@ public class ProfesorActivity extends AppCompatActivity {
                 @Override
                 public void onAsignaturaClick(Asignatura asignatura) {
                     // TODO escribir intent al nuevo presentacionactivity pasando ID asignatura como parámetro
-
+                Intent intentPresentacionActivity = new Intent(ProfesorActivity.this, PresentacionActivity.class);
+                intentPresentacionActivity.putExtra("Id asignatura", asignatura.id);
+                startActivity(intentPresentacionActivity);
                 }
             });
             mainContainer.addView(itemView);
