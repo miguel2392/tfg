@@ -83,8 +83,10 @@ public class ProfesorActivity extends AppCompatActivity {
                 @Override
                 public void onAsignaturaClick(Asignatura asignatura) {
                     // TODO escribir intent al nuevo presentacionactivity pasando ID asignatura como parámetro
+
+                    // TODO implementar el patron de arriba para lanzar el intent
                 Intent intentPresentacionActivity = new Intent(ProfesorActivity.this, PresentacionActivity.class);
-                intentPresentacionActivity.putExtra("Id asignatura", asignatura.id);
+                intentPresentacionActivity.putExtra("Id asignatura", asignatura.id).putExtra("nombre",asignatura.name);
                 startActivity(intentPresentacionActivity);
                 }
             });

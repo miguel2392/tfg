@@ -18,6 +18,8 @@ import java.util.Map;
 public class PresentacionActivity extends AppCompatActivity {
 
     private String idAsignatura;
+    private String name;
+    private String idPresentacion;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +44,7 @@ public class PresentacionActivity extends AppCompatActivity {
     private void recibirDatos(){
         Bundle idRecibido = getIntent().getExtras();
         idAsignatura = idRecibido.getString("Id asignatura");
+        name = idRecibido.getString("nombre");
         Log.d("!!!", idAsignatura);
     }
 
@@ -49,14 +52,17 @@ public class PresentacionActivity extends AppCompatActivity {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         Map<String, Object> presentation = new HashMap<>();
-        presentation.put("nombre", "Señales y Sistemas");
+        presentation.put("nombre", name);
+        presentation.put("id_asignatura",idAsignatura);
+        AutoId generador = new AutoId();
 
-
-        db.collection("presentaciones").document(idAsignatura).set(presentation)
+        idPresentacion = generador.autoId(20);
+        db.collection("presentaciones").document(idPresentacion).set(presentation)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
                     Log.d("¡¡¡", "DocumentSnapshot successfully written!");
+                    // TODO Mandar por ble trama adverstising con idAsignatura y idPresentacion.
                 }
         })
                 .addOnFailureListener(new OnFailureListener() {
