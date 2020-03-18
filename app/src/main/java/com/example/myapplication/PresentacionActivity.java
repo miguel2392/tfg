@@ -3,10 +3,13 @@ package com.example.myapplication;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -17,9 +20,21 @@ import java.util.Map;
 
 public class PresentacionActivity extends AppCompatActivity {
 
+    public static void startActivity(Context context, String asignaturaID, String nombreAsignatura) {
+
+        Intent intentPresentacionActivity = new Intent(context, PresentacionActivity.class);
+        intentPresentacionActivity
+                .putExtra("Id asignatura", asignaturaID)
+                .putExtra("nombre",nombreAsignatura);;
+
+        context.startActivity(intentPresentacionActivity);
+    }
+
     private String idAsignatura;
     private String name;
     private String idPresentacion;
+    private EditText et1;
+    private String nombrePresentacion;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +43,7 @@ public class PresentacionActivity extends AppCompatActivity {
 
         recibirDatos();
 
+        et1 = findViewById(R.id.editTextTitulo);
 
 
         Button empezarPresentacion = findViewById(R.id.buttonEmpezarPresentacion);
@@ -35,6 +51,7 @@ public class PresentacionActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // método para crear documentos en la base de datos
+                nombrePresentacion = et1.getText().toString();
                 createDbDocument();
             }
         });
@@ -52,8 +69,9 @@ public class PresentacionActivity extends AppCompatActivity {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         Map<String, Object> presentation = new HashMap<>();
-        presentation.put("nombre", name);
+        presentation.put("nombre asignatura", name);
         presentation.put("id_asignatura",idAsignatura);
+        presentation.put("nombre presentación",nombrePresentacion);
         AutoId generador = new AutoId();
 
         idPresentacion = generador.autoId(20);

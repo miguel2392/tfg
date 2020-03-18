@@ -11,6 +11,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -19,10 +21,13 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class ProfesorActivity extends AppCompatActivity {
+
     private static String EXTRA_NAME = "EXTRA_NAME";
     public static void startActivity(Context context, String name) {
 
@@ -38,6 +43,8 @@ public class ProfesorActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profesor);
+
+
 
         String name = getIntent().getStringExtra(EXTRA_NAME);
         mainContainer = findViewById(R.id.asignaturas_container);
@@ -82,16 +89,21 @@ public class ProfesorActivity extends AppCompatActivity {
             itemView.setOnAsignaturaClickListener(new AsignaturaClickListener() {
                 @Override
                 public void onAsignaturaClick(Asignatura asignatura) {
-                    // TODO escribir intent al nuevo presentacionactivity pasando ID asignatura como parámetro
 
-                    // TODO implementar el patron de arriba para lanzar el intent
-                Intent intentPresentacionActivity = new Intent(ProfesorActivity.this, PresentacionActivity.class);
-                intentPresentacionActivity.putExtra("Id asignatura", asignatura.id).putExtra("nombre",asignatura.name);
-                startActivity(intentPresentacionActivity);
+                //Intent intentPresentacionActivity = new Intent(ProfesorActivity.this, PresentacionActivity.class);
+                //intentPresentacionActivity.putExtra("Id asignatura", asignatura.id).putExtra("nombre",asignatura.name);
+                //startActivity(intentPresentacionActivity);
+                    PresentacionActivity.startActivity(ProfesorActivity.this,asignatura.id,asignatura.name);
                 }
             });
             mainContainer.addView(itemView);
         }
     }
+
+
+
+
+
+
 
 }
