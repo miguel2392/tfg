@@ -15,6 +15,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class DiferenciacionActivity extends AppCompatActivity {
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +39,21 @@ public class DiferenciacionActivity extends AppCompatActivity {
                                 ProfesorActivity.startActivity(DiferenciacionActivity.this, name);
                             } else{
                                 //lanzar activity alumno
+
+                                FirebaseUser user2 = FirebaseAuth.getInstance().getCurrentUser();
+                                FirebaseFirestore db2 = FirebaseFirestore.getInstance();
+                                db2.collection("alumnos").document(user2.getUid()).get()
+                                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                DocumentSnapshot documentSnapshot = task.getResult();
+                                                if (documentSnapshot != null && documentSnapshot.exists()) {
+                                                    //lanzar activity alumno
+                                                    String name2 = documentSnapshot.getString("nombre");
+                                                    AlumnoActivity.startActivity(DiferenciacionActivity.this, name2);
+                                                }
+                                            }
+                                        });
                             }
                         }
                     });

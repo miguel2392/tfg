@@ -14,6 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".PresentacionActivity"></activity>
+        <activity android:name=".AlumnoActivity" />
         <activity android:name=".ProfesorActivity" />
         <activity android:name=".DiferenciacionActivity" />
         <activity android:name=".AuthenticationActivity" />

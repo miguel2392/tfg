@@ -13,6 +13,8 @@ import android.widget.EditText;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -68,10 +70,14 @@ public class PresentacionActivity extends AppCompatActivity {
     private void createDbDocument(){
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String idProfesor = user.getUid();
+
         Map<String, Object> presentation = new HashMap<>();
         presentation.put("nombre asignatura", name);
         presentation.put("id_asignatura",idAsignatura);
         presentation.put("nombre presentación",nombrePresentacion);
+        presentation.put("owner",idProfesor);
         AutoId generador = new AutoId();
 
         idPresentacion = generador.autoId(20);
@@ -88,7 +94,7 @@ public class PresentacionActivity extends AppCompatActivity {
                     public void onFailure(@NonNull Exception e) {
                         Log.w("¡¡¡", "Error writing document", e);
                     }
-                });;
+                });
 
     }
 }
