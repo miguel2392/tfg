@@ -8,6 +8,7 @@
     <string name="button3">FIND DEVICE</string>
     <string name="button4">Start Advertising</string>
     <string name="buttonEmpezarPresentacion">Empezar presentación</string>
+    <string name="buttonAcabarPresentacion">Acabar presentación</string>
     <string name="emailCreateAccountButton">Create Account</string>
     <string name="signOutButton">Sign Out</string>
     <string name="emailSignInButton">Sign In</string>

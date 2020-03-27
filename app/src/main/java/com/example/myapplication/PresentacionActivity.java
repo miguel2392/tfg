@@ -78,6 +78,7 @@ public class PresentacionActivity extends AppCompatActivity {
         presentation.put("id_asignatura",idAsignatura);
         presentation.put("nombre presentación",nombrePresentacion);
         presentation.put("owner",idProfesor);
+        presentation.put("isFinished",false);
         AutoId generador = new AutoId();
 
         idPresentacion = generador.autoId(20);
@@ -86,7 +87,11 @@ public class PresentacionActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(Void aVoid) {
                     Log.d("¡¡¡", "DocumentSnapshot successfully written!");
-                    // TODO Mandar por ble trama adverstising con idAsignatura y idPresentacion.
+
+                    // TODO intent a CalificacionActivity
+                    CalificacionActivity.startActivity(PresentacionActivity.this,idAsignatura,idPresentacion);
+                    finish();
+                    // TODO Mandar por ble trama adverstising con idAsignatura y idPresentacion en calificacion activity
                 }
         })
                 .addOnFailureListener(new OnFailureListener() {
