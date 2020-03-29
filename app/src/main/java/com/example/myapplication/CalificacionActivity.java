@@ -14,8 +14,19 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.annotations.Nullable;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CalificacionActivity extends AppCompatActivity {
 
@@ -76,7 +87,7 @@ public class CalificacionActivity extends AppCompatActivity {
         recibirDatos();
 
         // TODO mandar trama BLE con idAsignatura e idPresentacion
-        // TODO Display calificaciones en tiempo real
+
 
         Button acabarPresentacion = findViewById(R.id.buttonAcabarPresentacion);
         acabarPresentacion.setOnClickListener(new View.OnClickListener() {
@@ -87,5 +98,32 @@ public class CalificacionActivity extends AppCompatActivity {
             }
         });
 
+        // TODO Display calificaciones en tiempo real
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("presentaciones").document(idPresentacion).collection("Calificaciones")
+                .addSnapshotListener(new EventListener<QuerySnapshot>(){
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w("!!!", "Listen failed.", e);
+                            return;
+                        }
+
+                        List<String> calificaciones = new ArrayList<>();
+                        for (QueryDocumentSnapshot doc : value) {
+                            doc.getData();
+                            if (doc.get("Calificaciones") != null) {
+                                calificaciones.add(doc.getString("Calificaciones"));
+                            }
+                        }
+                        Log.d("!!!", "Current cites in CA: " + calificaciones);
+                    }
+                });
+
+
     }
+
+
 }
