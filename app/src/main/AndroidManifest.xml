@@ -13,7 +13,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".PresentacionActivity"></activity>
+        <activity android:name=".PresentacionActivity"/>
+        <activity android:name=".AcabarActivity" />
         <activity android:name=".AlumnoActivity" />
         <activity android:name=".CalificacionActivity" />
         <activity android:name=".ProfesorActivity" />

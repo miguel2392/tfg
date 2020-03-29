@@ -7,6 +7,7 @@
     <string name="buttonC">Open Authentication Activity</string>
     <string name="button3">FIND DEVICE</string>
     <string name="button4">Start Advertising</string>
+    <string name="buttonSalir">Salir</string>
     <string name="buttonEmpezarPresentacion">Empezar presentación</string>
     <string name="buttonAcabarPresentacion">Acabar presentación</string>
     <string name="emailCreateAccountButton">Create Account</string>

@@ -89,7 +89,7 @@ public class PresentacionActivity extends AppCompatActivity {
                     Log.d("¡¡¡", "DocumentSnapshot successfully written!");
 
                     // TODO intent a CalificacionActivity
-                    CalificacionActivity.startActivity(PresentacionActivity.this,idAsignatura,idPresentacion);
+                    CalificacionActivity.startActivity(PresentacionActivity.this,idAsignatura,idPresentacion,nombrePresentacion);
                     finish();
                     // TODO Mandar por ble trama adverstising con idAsignatura y idPresentacion en calificacion activity
                 }
