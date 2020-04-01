@@ -111,14 +111,15 @@ public class CalificacionActivity extends AppCompatActivity {
                             return;
                         }
 
-                        List<String> calificaciones = new ArrayList<>();
+                        List<Long> calificaciones = new ArrayList<>();
                         for (QueryDocumentSnapshot doc : value) {
                             doc.getData();
                             if (doc.get("Calificaciones") != null) {
-                                calificaciones.add(doc.getString("Calificaciones"));
+                                calificaciones.add(doc.getLong("calificacion"));
+                                Log.d("!!!", "Notas " + doc.toString());
                             }
                         }
-                        Log.d("!!!", "Current cites in CA: " + calificaciones);
+                        //Log.d("!!!", "Notas " + calificaciones);
                     }
                 });
 
