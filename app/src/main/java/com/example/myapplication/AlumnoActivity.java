@@ -68,8 +68,8 @@ public class AlumnoActivity extends AppCompatActivity {
         calificacion.put("calificacion", nota);
         //calificacion.put("calificacion", nota2);
 
-        db.collection("presentaciones").document("ktgRN7xEDuiFzcIjNrc0")
-                .collection("Calificaciones").document(idAlumno).set(calificacion)
+        db.collection("presentaciones").document("V50aUHJgAvjZSnxdNiPv")
+                .collection("calificaciones").document(idAlumno).set(calificacion)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {

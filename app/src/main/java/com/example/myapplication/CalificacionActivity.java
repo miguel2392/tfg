@@ -22,6 +22,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -34,6 +36,8 @@ public class CalificacionActivity extends AppCompatActivity {
     private String idPresentacion;
     private String nombrePresentacion;
     private int media;
+    private ListenerRegistration listener;
+
 
     public static void startActivity(Context context, String asignaturaID, String presentacionID, String nombrePresentacion) {
 
@@ -56,7 +60,7 @@ public class CalificacionActivity extends AppCompatActivity {
     }
 
     private void acabarPresentacion(){
-        // TODO modificar field isFinished en base de datos
+        //  modificar field isFinished en base de datos
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("presentaciones").document(idPresentacion).update("isFinished",true)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -69,6 +73,7 @@ public class CalificacionActivity extends AppCompatActivity {
                         media =8;
                         AcabarActivity.startActivity(CalificacionActivity.this,nombrePresentacion,media);
                         finish();
+
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -77,6 +82,57 @@ public class CalificacionActivity extends AppCompatActivity {
                         Log.w("¡¡¡", "Error writing document", e);
                     }
                 });
+    }
+
+    private void empezarEscuchar(){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        Query query = db.collection("presentaciones").document(idPresentacion).collection("calificaciones");
+
+                listener = query.addSnapshotListener(new EventListener<QuerySnapshot>(){
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w("!!!", "Listen failed.", e);
+                            return;
+                        }
+
+                        List<Long> calificaciones = new ArrayList<>();
+                        Log.d("!!!", "Aqui si llegamos no");
+                        for (QueryDocumentSnapshot doc : value) {
+                            doc.getData();
+                            Log.d("!!!", "Por lo menos aqui llegamos");
+                            Log.d("!!!", doc.toString());
+                            if (doc.get("calificacion") != null) {
+                                calificaciones.add(doc.getLong("calificacion"));
+                                Log.d("!!!", "Notas " + calificaciones);
+                            }
+                        }
+                        //Log.d("!!!", "Notas " + calificaciones);
+                    }
+                });
+    }
+
+    private void acabarEscuchar(){
+        listener.remove();
+    }
+
+    private void leerDatos(){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("presentaciones").document(idPresentacion).collection("calificaciones").get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>(){
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()){
+                            Log.d("!!!", "GET COMPLETADO");
+                        }
+                        else {
+                            Log.w("!!!", "Error getting documents.", task.getException());
+                        }
+                    }
+
+                    });
     }
 
     @Override
@@ -88,7 +144,7 @@ public class CalificacionActivity extends AppCompatActivity {
 
         // TODO mandar trama BLE con idAsignatura e idPresentacion
 
-
+        // Boton acabar presentación
         Button acabarPresentacion = findViewById(R.id.buttonAcabarPresentacion);
         acabarPresentacion.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,29 +155,41 @@ public class CalificacionActivity extends AppCompatActivity {
         });
 
         // TODO Display calificaciones en tiempo real
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        db.collection("presentaciones").document(idPresentacion).collection("Calificaciones")
-                .addSnapshotListener(new EventListener<QuerySnapshot>(){
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot value,
-                                        @Nullable FirebaseFirestoreException e) {
-                        if (e != null) {
-                            Log.w("!!!", "Listen failed.", e);
-                            return;
-                        }
+        // Boton empezar a escuchar
+        Button empezarEscuchar = findViewById(R.id.buttonEmpezarEscuchar);
+        empezarEscuchar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
-                        List<Long> calificaciones = new ArrayList<>();
-                        for (QueryDocumentSnapshot doc : value) {
-                            doc.getData();
-                            if (doc.get("Calificaciones") != null) {
-                                calificaciones.add(doc.getLong("calificacion"));
-                                Log.d("!!!", "Notas " + doc.toString());
-                            }
-                        }
-                        //Log.d("!!!", "Notas " + calificaciones);
-                    }
-                });
+                empezarEscuchar();
+            }
+        });
+
+
+
+        // Boton acabar de escuchar
+        Button acabarEscuchar = findViewById(R.id.buttonAcabarEscuchar);
+        acabarEscuchar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                acabarEscuchar();
+            }
+        });
+
+
+        // Boton leer datos
+        Button leerDatos = findViewById(R.id.buttonLeerDatos);
+        leerDatos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                leerDatos();
+            }
+        });
+
+
 
 
     }
