@@ -12,10 +12,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class AcabarActivity extends AppCompatActivity {
 
-    private int media;
+    private double media;
     private String nombrePresentacion;
 
-    public static void startActivity(Context context, String nombrepresentacion, int media) {
+    public static void startActivity(Context context, String nombrepresentacion, double media) {
 
         Intent intentAcabarActivity = new Intent(context, AcabarActivity.class);
         intentAcabarActivity
@@ -28,7 +28,7 @@ public class AcabarActivity extends AppCompatActivity {
     private void recibirDatos(){
         Bundle idRecibido = getIntent().getExtras();
         nombrePresentacion = idRecibido.getString("nombre_presentacion");
-        media = idRecibido.getInt("media");
+        media = idRecibido.getDouble("media");
         Log.d("!!!", "Nombre Presentacion = "+nombrePresentacion+"   Media = "+media);
     }
 

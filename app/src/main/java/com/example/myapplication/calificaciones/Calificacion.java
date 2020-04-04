@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.example.myapplication.calificaciones;
 
 public class Calificacion {
     final String nombreAlumno;

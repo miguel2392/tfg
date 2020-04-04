@@ -1,24 +1,26 @@
-package com.example.myapplication;
+package com.example.myapplication.calificaciones;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.myapplication.AcabarActivity;
+import com.example.myapplication.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.annotations.Nullable;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -28,6 +30,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class CalificacionActivity extends AppCompatActivity {
@@ -35,8 +38,9 @@ public class CalificacionActivity extends AppCompatActivity {
     private String idAsignatura;
     private String idPresentacion;
     private String nombrePresentacion;
-    private int media;
     private ListenerRegistration listener;
+    private CalificacionesListView calificacionesListView;
+    private Handler handler;
 
 
     public static void startActivity(Context context, String asignaturaID, String presentacionID, String nombrePresentacion) {
@@ -51,6 +55,34 @@ public class CalificacionActivity extends AppCompatActivity {
         context.startActivity(intentCalificacionActivity);
     }
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_calificacion);
+        handler = new Handler(Looper.getMainLooper());
+        calificacionesListView = findViewById(R.id.calificaciones_list_view);
+        recibirDatos();
+        setTitle(nombrePresentacion);
+
+        // TODO mandar trama BLE con idAsignatura e idPresentacion
+
+        // Boton acabar presentación
+        Button acabarPresentacion = findViewById(R.id.buttonAcabarPresentacion);
+        acabarPresentacion.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showFinishDialog();
+            }
+        });
+        //Automatically start listening to model updates.
+        empezarEscuchar();
+    }
+
+    @Override
+    public void onBackPressed() {
+        //Block back navigation
+    }
+
     private void recibirDatos(){
         Bundle idRecibido = getIntent().getExtras();
         idAsignatura = idRecibido.getString("Id_asignatura");
@@ -61,6 +93,7 @@ public class CalificacionActivity extends AppCompatActivity {
 
     private void acabarPresentacion(){
         //  modificar field isFinished en base de datos
+        listener.remove();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("presentaciones").document(idPresentacion).update("isFinished",true)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -69,9 +102,9 @@ public class CalificacionActivity extends AppCompatActivity {
                         Log.d("¡¡¡", "Field isFinished updated TRUE");
                         // TODO Lanzar nueva AcabarActivity nombrePresentacion y media.
 
-                        // media temporal a mano
-                        media =8;
-                        AcabarActivity.startActivity(CalificacionActivity.this,nombrePresentacion,media);
+                        AcabarActivity.startActivity(CalificacionActivity.this,
+                                                     nombrePresentacion,
+                                                     calificacionesListView.getMedia());
                         finish();
 
                     }
@@ -116,12 +149,13 @@ public class CalificacionActivity extends AppCompatActivity {
                 });
     }
 
-    private void displayData(List<Calificacion> listaCalificaciones){
-        // TODO Santiago haz tu magia borras
-    }
-
-    private void acabarEscuchar(){
-        listener.remove();
+    private void displayData(final List<Calificacion> listaCalificaciones){
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                calificacionesListView.setCalificaciones(listaCalificaciones);
+            }
+        });
     }
 
     private void leerDatos(){
@@ -141,64 +175,22 @@ public class CalificacionActivity extends AppCompatActivity {
                     });
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_calificacion);
-
-        recibirDatos();
-
-        // TODO mandar trama BLE con idAsignatura e idPresentacion
-
-        // Boton acabar presentación
-        Button acabarPresentacion = findViewById(R.id.buttonAcabarPresentacion);
-        acabarPresentacion.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                acabarPresentacion();
-            }
-        });
-
-        // TODO Display calificaciones en tiempo real
-
-        // Boton empezar a escuchar
-        Button empezarEscuchar = findViewById(R.id.buttonEmpezarEscuchar);
-        empezarEscuchar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                empezarEscuchar();
-            }
-        });
-
-
-
-        // Boton acabar de escuchar
-        Button acabarEscuchar = findViewById(R.id.buttonAcabarEscuchar);
-        acabarEscuchar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                acabarEscuchar();
-            }
-        });
-
-
-        // Boton leer datos
-        Button leerDatos = findViewById(R.id.buttonLeerDatos);
-        leerDatos.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                leerDatos();
-            }
-        });
-
-
-
-
+    private void showFinishDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Terminar presentacion")
+                .setMessage("¿Esta seguro de que quiere terminar la presentación?")
+                .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(final DialogInterface dialog, final int which) {
+                        acabarPresentacion();
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(final DialogInterface dialog, final int which) {
+                        dialog.dismiss();
+                    }
+                }).show();
     }
-
-
 }

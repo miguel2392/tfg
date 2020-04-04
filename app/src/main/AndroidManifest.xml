@@ -16,7 +16,7 @@
         <activity android:name=".PresentacionActivity"/>
         <activity android:name=".AcabarActivity" />
         <activity android:name=".AlumnoActivity" />
-        <activity android:name=".CalificacionActivity" />
+        <activity android:name=".calificaciones.CalificacionActivity" />
         <activity android:name=".ProfesorActivity" />
         <activity android:name=".DiferenciacionActivity" />
         <activity android:name=".AuthenticationActivity" />
