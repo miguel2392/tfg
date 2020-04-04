@@ -98,20 +98,26 @@ public class CalificacionActivity extends AppCompatActivity {
                             return;
                         }
 
-                        List<Long> calificaciones = new ArrayList<>();
+                        List<Calificacion> calificaciones = new ArrayList<>();
                         Log.d("!!!", "Aqui si llegamos no");
                         for (QueryDocumentSnapshot doc : value) {
-                            doc.getData();
                             Log.d("!!!", "Por lo menos aqui llegamos");
                             Log.d("!!!", doc.toString());
                             if (doc.get("calificacion") != null) {
-                                calificaciones.add(doc.getLong("calificacion"));
+                                Calificacion nota = new Calificacion(doc.getString("nombre_alumno"),doc.getLong("calificacion"));
+                                calificaciones.add(nota);
                                 Log.d("!!!", "Notas " + calificaciones);
+
                             }
                         }
+                        displayData(calificaciones);
                         //Log.d("!!!", "Notas " + calificaciones);
                     }
                 });
+    }
+
+    private void displayData(List<Calificacion> listaCalificaciones){
+        // TODO Santiago haz tu magia borras
     }
 
     private void acabarEscuchar(){
