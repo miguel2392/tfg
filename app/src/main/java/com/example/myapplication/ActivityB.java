@@ -81,7 +81,7 @@ public class ActivityB extends AppCompatActivity {
 
 
 
-        ParcelUuid pUuid = new ParcelUuid( UUID.fromString( getString( R.string.ble_uuid ) ) );
+        ParcelUuid pUuid = new ParcelUuid(UUID.fromString(getString(R.string.ble_uuid)));
         //byte[] messageToSend = "Data".getBytes(Charset.forName("UTF-8"));
         byte[] password = new byte[6];
         password[0] =0;

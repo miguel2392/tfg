@@ -1,11 +1,19 @@
 package com.example.myapplication.calificaciones;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
+import android.bluetooth.le.AdvertiseData;
+import android.bluetooth.le.AdvertisingSet;
+import android.bluetooth.le.AdvertisingSetCallback;
+import android.bluetooth.le.AdvertisingSetParameters;
+import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.ParcelUuid;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -32,6 +40,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 public class CalificacionActivity extends AppCompatActivity {
 
@@ -41,6 +50,9 @@ public class CalificacionActivity extends AppCompatActivity {
     private ListenerRegistration listener;
     private CalificacionesListView calificacionesListView;
     private Handler handler;
+    private BluetoothAdapter bluetoothAdapter;
+    static final int REQUEST_ENABLE_BT = 0;
+    private AdvertisingSet currentAdvertisingSet;
 
 
     public static void startActivity(Context context, String asignaturaID, String presentacionID, String nombrePresentacion) {
@@ -65,6 +77,22 @@ public class CalificacionActivity extends AppCompatActivity {
         setTitle(nombrePresentacion);
 
         // TODO mandar trama BLE con idAsignatura e idPresentacion
+
+        // Inicializacion Bluetooth Adapter
+        final BluetoothManager bluetoothManager =
+                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        bluetoothAdapter = bluetoothManager.getAdapter();
+
+        // Asegura que bluetooth esta activado, si no lo está, pide que se active
+
+        if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
+
+        startAdvertising();
+
+
 
         // Boton acabar presentación
         Button acabarPresentacion = findViewById(R.id.buttonAcabarPresentacion);
@@ -94,6 +122,7 @@ public class CalificacionActivity extends AppCompatActivity {
     private void acabarPresentacion(){
         //  modificar field isFinished en base de datos
         listener.remove();
+        stopAdvertising();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("presentaciones").document(idPresentacion).update("isFinished",true)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -193,4 +222,98 @@ public class CalificacionActivity extends AppCompatActivity {
                     }
                 }).show();
     }
+
+    private void startAdvertising(){
+
+        bluetoothAdapter.setName(nombrePresentacion);
+
+        BluetoothLeAdvertiser advertiser = BluetoothAdapter.getDefaultAdapter().getBluetoothLeAdvertiser();
+
+        AdvertisingSetParameters parameters = (new AdvertisingSetParameters.Builder())
+                .setLegacyMode(true) // True by default, but set here as a reminder.
+                .setConnectable(false).setScannable(true)
+                .setInterval(AdvertisingSetParameters.INTERVAL_HIGH)
+                .setTxPowerLevel(AdvertisingSetParameters.TX_POWER_MEDIUM)
+                .build();
+
+        ParcelUuid pUuid = new ParcelUuid(UUID.fromString(getString(R.string.ble_uuid)));
+
+        //Pasar los dos String a mandar a un array de bytes
+
+        byte[] serviceData = new byte[28];
+        int bufferPosition = 0;
+
+        //String idAsignatura
+
+        byte[] bytesIdAsignatura = idAsignatura.getBytes();
+        System.arraycopy(bytesIdAsignatura,0,serviceData,bufferPosition,bytesIdAsignatura.length);
+        bufferPosition += bytesIdAsignatura.length;
+
+        //String idPresentacion
+
+        byte [] bytesIdPresentacion = idPresentacion.getBytes();
+        System.arraycopy(bytesIdPresentacion,0,serviceData,bufferPosition,bytesIdPresentacion.length);
+
+        AdvertiseData data = new AdvertiseData.Builder()
+                .setIncludeDeviceName(true)
+                .addServiceData(pUuid,serviceData)
+                .build();
+
+        // Concatenando Strings
+
+        /*String idConcatenado = idAsignatura+idPresentacion;
+        byte [] serviceData2 = idConcatenado.getBytes();
+        AdvertiseData data2 = new AdvertiseData.Builder()
+                .setIncludeDeviceName(true)
+                .addServiceData(pUuid,serviceData2)
+                .build();
+        advertiser.startAdvertisingSet(parameters, data2, null, null, null, callback);*/
+
+        advertiser.startAdvertisingSet(parameters, data, null, null, null, callback);
+
+    }
+
+    private void onAdvertisingStart(){
+        // After onAdvertisingSetStarted callback is called, you can modify the
+        // advertising data and scan response data:
+        currentAdvertisingSet.setAdvertisingData(new AdvertiseData.Builder().
+                setIncludeDeviceName(true).setIncludeTxPowerLevel(true).build());
+        // Wait for onAdvertisingDataSet callback...
+        currentAdvertisingSet.setScanResponseData(new
+                AdvertiseData.Builder().addServiceUuid(new ParcelUuid(UUID.randomUUID())).build());
+        // Wait for onScanResponseDataSet callback...
+    }
+
+    private void stopAdvertising(){
+
+        BluetoothLeAdvertiser advertiser = BluetoothAdapter.getDefaultAdapter().getBluetoothLeAdvertiser();
+        advertiser.stopAdvertisingSet(callback);
+    }
+
+    private AdvertisingSetCallback callback = new AdvertisingSetCallback() {
+        @Override
+        public void onAdvertisingSetStarted(AdvertisingSet advertisingSet, int txPower, int status) {
+            //Log.i(LOG_TAG, "onAdvertisingSetStarted(): txPower:" + txPower + " , status: "
+            //      + status);
+            currentAdvertisingSet = advertisingSet;
+            onAdvertisingStart();
+        }
+
+        @Override
+        public void onAdvertisingDataSet(AdvertisingSet advertisingSet, int status) {
+            //Log.i(LOG_TAG, "onAdvertisingDataSet() :status:" + status);
+        }
+
+        @Override
+        public void onScanResponseDataSet(AdvertisingSet advertisingSet, int status) {
+            // Log.i(LOG_TAG, "onScanResponseDataSet(): status:" + status);
+        }
+
+        @Override
+        public void onAdvertisingSetStopped(AdvertisingSet advertisingSet) {
+            // Log.i(LOG_TAG, "onAdvertisingSetStopped():");
+        }
+
+
+    };
 }
