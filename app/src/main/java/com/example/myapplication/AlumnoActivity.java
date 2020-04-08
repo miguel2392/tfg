@@ -66,7 +66,7 @@ public class AlumnoActivity extends AppCompatActivity {
         Map<String, Object> calificacion = new HashMap<>();
         calificacion.put("nombre_alumno", name);
         calificacion.put("calificacion", nota);
-        //calificacion.put("calificacion", nota2);
+
 
         db.collection("presentaciones").document("V50aUHJgAvjZSnxdNiPv")
                 .collection("calificaciones").document(idAlumno).set(calificacion)
@@ -74,7 +74,6 @@ public class AlumnoActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d("¡¡¡", "DocumentSnapshot successfully written!");
-                        // TODO Mandar por ble trama adverstising con idAsignatura y idPresentacion.
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {

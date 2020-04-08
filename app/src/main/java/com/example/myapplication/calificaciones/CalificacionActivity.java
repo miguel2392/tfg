@@ -23,6 +23,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.myapplication.AcabarActivity;
+import com.example.myapplication.AdvertisingDataHelper;
 import com.example.myapplication.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -225,7 +226,9 @@ public class CalificacionActivity extends AppCompatActivity {
 
     private void startAdvertising(){
 
-        bluetoothAdapter.setName(nombrePresentacion);
+
+        String idConcatenado = AdvertisingDataHelper.generateDeviceName(idAsignatura,idPresentacion);
+        bluetoothAdapter.setName(idConcatenado);
 
         BluetoothLeAdvertiser advertiser = BluetoothAdapter.getDefaultAdapter().getBluetoothLeAdvertiser();
 
@@ -245,7 +248,7 @@ public class CalificacionActivity extends AppCompatActivity {
 
         //String idAsignatura
 
-        byte[] bytesIdAsignatura = idAsignatura.getBytes();
+        /*byte[] bytesIdAsignatura = idAsignatura.getBytes();
         System.arraycopy(bytesIdAsignatura,0,serviceData,bufferPosition,bytesIdAsignatura.length);
         bufferPosition += bytesIdAsignatura.length;
 
@@ -257,19 +260,19 @@ public class CalificacionActivity extends AppCompatActivity {
         AdvertiseData data = new AdvertiseData.Builder()
                 .setIncludeDeviceName(true)
                 .addServiceData(pUuid,serviceData)
-                .build();
+                .build();*/
 
         // Concatenando Strings
 
-        /*String idConcatenado = idAsignatura+idPresentacion;
+
         byte [] serviceData2 = idConcatenado.getBytes();
         AdvertiseData data2 = new AdvertiseData.Builder()
-                .setIncludeDeviceName(true)
+                .setIncludeDeviceName(false)
                 .addServiceData(pUuid,serviceData2)
                 .build();
-        advertiser.startAdvertisingSet(parameters, data2, null, null, null, callback);*/
+        advertiser.startAdvertisingSet(parameters, data2, null, null, null, callback);
 
-        advertiser.startAdvertisingSet(parameters, data, null, null, null, callback);
+        //advertiser.startAdvertisingSet(parameters, data, null, null, null, callback);
 
     }
 

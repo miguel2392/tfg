@@ -2,17 +2,20 @@ package com.example.myapplication;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.util.Pair;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.ParcelUuid;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -24,6 +27,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class ActivityA extends AppCompatActivity {
 
@@ -34,6 +39,8 @@ public class ActivityA extends AppCompatActivity {
     private Handler handler;
     private HashSet<String> macs = new HashSet<>();
     private HashMap<String, Integer> rssiMap = new HashMap<>();
+    private ScanRecord scanRecord;
+    private List<String>asignaturas;
 
 
     @Override
@@ -63,6 +70,9 @@ public class ActivityA extends AppCompatActivity {
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
 
         }
+
+        getAsignaturas();
+
     }
 
     private ScanCallback scanCallbackBueno = new ScanCallback() {
@@ -71,9 +81,28 @@ public class ActivityA extends AppCompatActivity {
 
             macs.add(result.getDevice().getAddress());
             rssiMap.put(result.getDevice().getAddress(), result.getRssi());
+            scanRecord = result.getScanRecord();
+            if (scanRecord != null) {
+                String deviceName = scanRecord.getDeviceName();
+                Log.d("!!!","Nombre: " +deviceName);
+                Pair<String,String> resultado = AdvertisingDataHelper.recoverIds(deviceName);
+                if (resultado !=null){
+                    // TODO Mirar asignatura id esta en la lista de asignaturas del alumno
+                    if (asignaturas.contains(resultado.first)){
+                        scanLeDevice(false);
+                        // TODO intent a alumnoActivity pasandole idPresentacion
+                    }
+                }
+            }
+
             Log.d("!!!","result: " + result.toString());
+
         }
     };
+
+
+
+
 
 
     private void scanLeDevice(final boolean enable) {
@@ -83,23 +112,22 @@ public class ActivityA extends AppCompatActivity {
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    for (String s : macs) {
-                        Log.d("!!!", s + " rssi: " + rssiMap.get(s));
-                    }
+                    if(mScanning){
                     mScanning = false;
                     //bluetoothAdapter.stopLeScan(scanCallback);
                     bluetoothAdapter.getBluetoothLeScanner().stopScan(scanCallbackBueno);
+                    }
                 }
                 }, SCAN_PERIOD);
 
             mScanning = true;
-            //bluetoothAdapter.startLeScan(scanCallback);
+
             bluetoothAdapter.getBluetoothLeScanner().startScan(scanCallbackBueno);
 
         } else {
             mScanning = false;
             bluetoothAdapter.getBluetoothLeScanner().stopScan(scanCallbackBueno);
-            //bluetoothAdapter.stopLeScan(scanCallback);
+
         }
     }
 
@@ -152,8 +180,7 @@ public class ActivityA extends AppCompatActivity {
     }
 
 
-    public static String ByteArrayToString(byte[] ba)
-    {
+    public static String ByteArrayToString(byte[] ba) {
         StringBuilder hex = new StringBuilder(ba.length * 2);
         for (byte b : ba)
             hex.append(b + " ");
@@ -177,7 +204,7 @@ public class ActivityA extends AppCompatActivity {
             Log.d("DEBUG", "Length: " + length + " Type : " + type + " DataString : " + dataString);
         }
 
-        // ...
+
 
         public static List<AdRecord> parseScanRecord(byte[] scanRecord) {
             List<AdRecord> records = new ArrayList<AdRecord>();
@@ -203,5 +230,10 @@ public class ActivityA extends AppCompatActivity {
         }
 
 
+    }
+
+    private void getAsignaturas() {
+        // TODO buscar la lista de asignaturas del alumno en database
+        // TODO dar valor a la lista de asignaturas
     }
 }
