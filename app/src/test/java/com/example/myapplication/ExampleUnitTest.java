@@ -1,5 +1,7 @@
 package com.example.myapplication;
 
+import androidx.core.util.Pair;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -23,5 +25,13 @@ public class ExampleUnitTest {
         String expectedresult = "AAAASDF12345678998765432100";
         assertEquals(expectedresult,result);
 
+    }
+
+    @Test
+    public void testDesconcatenation(){
+        String total = "AAAASDF12345678998765432100";
+        Pair<String,String> result2 = AdvertisingDataHelper.recoverIds(total);
+        Pair<String,String> expectedresult2 = new Pair<>("ASDF","12345678998765432100");
+        assertEquals(expectedresult2,result2);
     }
 }

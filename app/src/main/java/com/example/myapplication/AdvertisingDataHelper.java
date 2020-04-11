@@ -17,8 +17,8 @@ public class AdvertisingDataHelper {
         if (deviceName.length()!= header.length()+sizePresentacion+sizeAsignatura) {return null;}
         String extractedheader = deviceName.substring(0,header.length());
         if (!extractedheader.equals(header)){return null;}
-        String idAsignatura = deviceName.substring(header.length(),6);
-        String idPresentacion = deviceName.substring(9,17);
+        String idAsignatura = deviceName.substring(header.length(),header.length()+sizeAsignatura);
+        String idPresentacion = deviceName.substring(header.length()+sizeAsignatura,header.length()+sizeAsignatura+sizePresentacion);
         return new Pair<>(idAsignatura,idPresentacion);
     }
 }
