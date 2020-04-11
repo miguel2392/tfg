@@ -11,6 +11,8 @@ import android.view.View;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -24,25 +26,51 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if(FirebaseAuth.getInstance().getCurrentUser()==null){
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user==null){
             openAuthenticationActivity(null);
             finish();
+        } else {
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+            db.collection("profesores").document(user.getUid()).get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            DocumentSnapshot documentSnapshot = task.getResult();
+                            if (documentSnapshot != null && documentSnapshot.exists()) {
+                                //lanzar activity profesor
+                                String name = documentSnapshot.getString("nombre");
+                                ProfesorActivity.startActivity(MainActivity.this, name);
+                            } else{
+
+                                FirebaseFirestore db2 = FirebaseFirestore.getInstance();
+                                db2.collection("alumnos").document(user.getUid()).get()
+                                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                DocumentSnapshot documentSnapshot = task.getResult();
+                                                if (documentSnapshot != null && documentSnapshot.exists()) {
+                                                    //lanzar activity alumno
+                                                    String name2 = documentSnapshot.getString("nombre");
+                                                    AlumnoScanActivity.startActivity(MainActivity.this, name2);
+                                                } else{
+                                                    throw new IllegalStateException();
+                                                }
+                                            }
+                                        });
+                            }
+                        }
+                    });
         }
 
-        startActivity(new Intent(this,DiferenciacionActivity.class));
+
 
     }
 
-    public void openActivityA (View view){
-        Intent intentA = new Intent(this, ActivityA.class);
-        startActivity(intentA);
-    }
 
-    public void openActivityB (View view){
-        Intent intentB = new Intent(this, ActivityB.class);
-        startActivity(intentB);
 
-    }
+
 
     public void signOut (View view){
         FirebaseAuth.getInstance().signOut();

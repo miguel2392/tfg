@@ -89,10 +89,10 @@ public class CalificacionActivity extends AppCompatActivity {
         if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        } else {
+
+            startAdvertising();
         }
-
-        startAdvertising();
-
 
 
         // Boton acabar presentación
@@ -239,38 +239,13 @@ public class CalificacionActivity extends AppCompatActivity {
                 .setTxPowerLevel(AdvertisingSetParameters.TX_POWER_MEDIUM)
                 .build();
 
-        ParcelUuid pUuid = new ParcelUuid(UUID.fromString(getString(R.string.ble_uuid)));
-
-        //Pasar los dos String a mandar a un array de bytes
-
-        byte[] serviceData = new byte[28];
-        int bufferPosition = 0;
-
-        //String idAsignatura
-
-        /*byte[] bytesIdAsignatura = idAsignatura.getBytes();
-        System.arraycopy(bytesIdAsignatura,0,serviceData,bufferPosition,bytesIdAsignatura.length);
-        bufferPosition += bytesIdAsignatura.length;
-
-        //String idPresentacion
-
-        byte [] bytesIdPresentacion = idPresentacion.getBytes();
-        System.arraycopy(bytesIdPresentacion,0,serviceData,bufferPosition,bytesIdPresentacion.length);
-
-        AdvertiseData data = new AdvertiseData.Builder()
-                .setIncludeDeviceName(true)
-                .addServiceData(pUuid,serviceData)
-                .build();*/
-
-        // Concatenando Strings
 
 
-        byte [] serviceData2 = idConcatenado.getBytes();
-        AdvertiseData data2 = new AdvertiseData.Builder()
-                .setIncludeDeviceName(false)
-                .addServiceData(pUuid,serviceData2)
-                .build();
-        advertiser.startAdvertisingSet(parameters, data2, null, null, null, callback);
+
+
+
+
+        advertiser.startAdvertisingSet(parameters, null, null, null, null, callback);
 
         //advertiser.startAdvertisingSet(parameters, data, null, null, null, callback);
 

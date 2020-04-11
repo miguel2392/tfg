@@ -43,7 +43,7 @@ public class AcabarActivity extends AppCompatActivity {
         nombrePresentacionText.setText(nombrePresentacion);
 
         TextView mediaText = findViewById(R.id.media);
-        mediaText.setText(nombrePresentacion);
+        mediaText.setText(String.valueOf(media));
 
         Button SalirPresentacion = findViewById(R.id.buttonSalir);
         SalirPresentacion.setOnClickListener(new View.OnClickListener() {

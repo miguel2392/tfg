@@ -1,36 +1,44 @@
 package com.example.myapplication;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.util.Pair;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.ParcelUuid;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
-public class ActivityA extends AppCompatActivity {
+public class AlumnoScanActivity extends AppCompatActivity {
 
     static final int REQUEST_ENABLE_BT = 0;
     private static final long SCAN_PERIOD = 10000;
@@ -41,19 +49,33 @@ public class ActivityA extends AppCompatActivity {
     private HashMap<String, Integer> rssiMap = new HashMap<>();
     private ScanRecord scanRecord;
     private List<String>asignaturas;
+    private static String EXTRA_NAME = "EXTRA_NAME";
+    private String nombreAlumno;
+    private Button boton;
+
+    public static void startActivity(Context context, String name) {
+
+        Intent intent = new Intent(context, AlumnoScanActivity.class);
+        intent.putExtra(EXTRA_NAME, name);
+        context.startActivity(intent);
+    }
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_activity_a);
-        Button boton=findViewById(R.id.button3);
+        boton=findViewById(R.id.button3);
+        boton.setEnabled(false);
         boton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 scanLeDevice(true);
             }
         });
+
+        nombreAlumno = getIntent().getStringExtra(EXTRA_NAME);
 
         handler = new Handler(Looper.getMainLooper());
 
@@ -84,18 +106,23 @@ public class ActivityA extends AppCompatActivity {
             scanRecord = result.getScanRecord();
             if (scanRecord != null) {
                 String deviceName = scanRecord.getDeviceName();
+                if(deviceName!=null){
                 Log.d("!!!","Nombre: " +deviceName);
                 Pair<String,String> resultado = AdvertisingDataHelper.recoverIds(deviceName);
                 if (resultado !=null){
-                    // TODO Mirar asignatura id esta en la lista de asignaturas del alumno
+
+                    //  Mirar asignatura id esta en la lista de asignaturas del alumno
                     if (asignaturas.contains(resultado.first)){
+
                         scanLeDevice(false);
                         // TODO intent a alumnoActivity pasandole idPresentacion
+                        AlumnoActivity.startActivity(AlumnoScanActivity.this,nombreAlumno,resultado.second);
                     }
+                }
                 }
             }
 
-            Log.d("!!!","result: " + result.toString());
+
 
         }
     };
@@ -103,7 +130,18 @@ public class ActivityA extends AppCompatActivity {
 
 
 
-
+    private void showTimeoutDialog(){
+        new AlertDialog.Builder(this)
+                .setMessage("No se ha encontrado ninguna presentación")
+                .setPositiveButton("Cerrar", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                })
+                .setCancelable(false)
+                .show();
+    }
 
     private void scanLeDevice(final boolean enable) {
         if (enable) {
@@ -116,6 +154,7 @@ public class ActivityA extends AppCompatActivity {
                     mScanning = false;
                     //bluetoothAdapter.stopLeScan(scanCallback);
                     bluetoothAdapter.getBluetoothLeScanner().stopScan(scanCallbackBueno);
+                    showTimeoutDialog();
                     }
                 }
                 }, SCAN_PERIOD);
@@ -127,6 +166,7 @@ public class ActivityA extends AppCompatActivity {
         } else {
             mScanning = false;
             bluetoothAdapter.getBluetoothLeScanner().stopScan(scanCallbackBueno);
+
 
         }
     }
@@ -235,5 +275,29 @@ public class ActivityA extends AppCompatActivity {
     private void getAsignaturas() {
         // TODO buscar la lista de asignaturas del alumno en database
         // TODO dar valor a la lista de asignaturas
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        db.collection("asignaturas").whereArrayContainsAny("alumnos", Arrays.asList(user.getUid()))
+                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()){
+                     asignaturas = new LinkedList<>();
+                    for (QueryDocumentSnapshot document: task.getResult()){
+                        Asignatura asignatura = new Asignatura(
+                                document.getId(),
+                                document.getString("nombre"),
+                                (List<String>) document.get("alumnos"),
+                                (List<String>) document.get("profesores")
+                        );
+                        asignaturas.add(asignatura.id);
+                        Log.d("!!!", document.getId() + " => " + document.getData());
+                    }
+                    boton.setEnabled(true);
+                } else {
+                    Log.w("!!!", "Error getting documents.", task.getException());
+                }
+            }
+        });
     }
 }

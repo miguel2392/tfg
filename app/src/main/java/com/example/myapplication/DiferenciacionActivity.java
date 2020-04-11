@@ -50,7 +50,7 @@ public class DiferenciacionActivity extends AppCompatActivity {
                                                 if (documentSnapshot != null && documentSnapshot.exists()) {
                                                     //lanzar activity alumno
                                                     String name2 = documentSnapshot.getString("nombre");
-                                                    AlumnoActivity.startActivity(DiferenciacionActivity.this, name2);
+                                                    AlumnoScanActivity.startActivity(DiferenciacionActivity.this, name2);
                                                 }
                                             }
                                         });

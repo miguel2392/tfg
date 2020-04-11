@@ -3,7 +3,7 @@ package com.example.myapplication;
 import androidx.core.util.Pair;
 
 public class AdvertisingDataHelper {
-    private static String header = "AAA";
+    private static String header = "AA";
     private static int sizeAsignatura = 4;
     private static int sizePresentacion = 20;
 

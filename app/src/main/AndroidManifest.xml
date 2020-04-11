@@ -21,7 +21,7 @@
         <activity android:name=".DiferenciacionActivity" />
         <activity android:name=".AuthenticationActivity" />
         <activity android:name=".ActivityB" />
-        <activity android:name=".ActivityA" />
+        <activity android:name=".AlumnoScanActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
