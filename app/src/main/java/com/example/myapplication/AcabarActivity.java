@@ -38,7 +38,7 @@ public class AcabarActivity extends AppCompatActivity {
         setContentView(R.layout.activity_acabar);
 
         recibirDatos();
-
+        setTitle("Presentación finalizada");
         TextView nombrePresentacionText = findViewById(R.id.nombre_presentacion);
         nombrePresentacionText.setText(nombrePresentacion);
 

@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.util.Pair;
+import com.example.myapplication.R;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
@@ -19,6 +20,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
@@ -65,6 +69,8 @@ public class AlumnoScanActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_activity_a);
+        nombreAlumno = getIntent().getStringExtra(EXTRA_NAME);
+        setTitle(nombreAlumno);
         boton=findViewById(R.id.button3);
         boton.setEnabled(false);
         boton.setOnClickListener(new View.OnClickListener() {
@@ -75,7 +81,7 @@ public class AlumnoScanActivity extends AppCompatActivity {
             }
         });
 
-        nombreAlumno = getIntent().getStringExtra(EXTRA_NAME);
+
 
         handler = new Handler(Looper.getMainLooper());
 
@@ -97,7 +103,7 @@ public class AlumnoScanActivity extends AppCompatActivity {
 
     }
 
-    private ScanCallback scanCallbackBueno = new ScanCallback() {
+    private ScanCallback scanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
 
@@ -115,7 +121,7 @@ public class AlumnoScanActivity extends AppCompatActivity {
                     if (asignaturas.contains(resultado.first)){
 
                         scanLeDevice(false);
-                        // TODO intent a alumnoActivity pasandole idPresentacion
+                        // intent a alumnoActivity pasandole idPresentacion y el nombre del alumno
                         AlumnoActivity.startActivity(AlumnoScanActivity.this,nombreAlumno,resultado.second);
                     }
                 }
@@ -146,14 +152,12 @@ public class AlumnoScanActivity extends AppCompatActivity {
     private void scanLeDevice(final boolean enable) {
         if (enable) {
             macs.clear();
-                // Stops scanning after a pre-defined scan period.
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     if(mScanning){
                     mScanning = false;
-                    //bluetoothAdapter.stopLeScan(scanCallback);
-                    bluetoothAdapter.getBluetoothLeScanner().stopScan(scanCallbackBueno);
+                    bluetoothAdapter.getBluetoothLeScanner().stopScan(scanCallback);
                     showTimeoutDialog();
                     }
                 }
@@ -161,13 +165,11 @@ public class AlumnoScanActivity extends AppCompatActivity {
 
             mScanning = true;
 
-            bluetoothAdapter.getBluetoothLeScanner().startScan(scanCallbackBueno);
+            bluetoothAdapter.getBluetoothLeScanner().startScan(scanCallback);
 
         } else {
             mScanning = false;
-            bluetoothAdapter.getBluetoothLeScanner().stopScan(scanCallbackBueno);
-
-
+            bluetoothAdapter.getBluetoothLeScanner().stopScan(scanCallback);
         }
     }
 
@@ -192,7 +194,45 @@ public class AlumnoScanActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_actionlogout,menu);
+        return true;
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId()==R.id.action_logout){
+            showLogOutDialog();
+        }
+        return true;
+    }
+
+    private void showLogOutDialog(){
+        new AlertDialog.Builder(this)
+                .setMessage("¿Quieres cerrar sesión?")
+                .setPositiveButton("Cerrar sesión", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        signOut();
+                    }
+                })
+                .setNegativeButton("Volver", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
+    }
+
+    public void signOut (){
+        FirebaseAuth.getInstance().signOut();
+        Intent intentSignIn = new Intent(this, AuthenticationActivity.class);
+        startActivity(intentSignIn);
+        finish();
+    }
 
 
     public void printScanRecord (byte[] scanRecord) {
@@ -273,8 +313,7 @@ public class AlumnoScanActivity extends AppCompatActivity {
     }
 
     private void getAsignaturas() {
-        // TODO buscar la lista de asignaturas del alumno en database
-        // TODO dar valor a la lista de asignaturas
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         db.collection("asignaturas").whereArrayContainsAny("alumnos", Arrays.asList(user.getUid()))

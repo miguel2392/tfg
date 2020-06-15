@@ -72,6 +72,7 @@ public class CalificacionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calificacion);
+
         handler = new Handler(Looper.getMainLooper());
         calificacionesListView = findViewById(R.id.calificaciones_list_view);
         recibirDatos();
@@ -121,7 +122,7 @@ public class CalificacionActivity extends AppCompatActivity {
     }
 
     private void acabarPresentacion(){
-        //  modificar field isFinished en base de datos
+
         listener.remove();
         stopAdvertising();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -130,7 +131,6 @@ public class CalificacionActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d("¡¡¡", "Field isFinished updated TRUE");
-                        // TODO Lanzar nueva AcabarActivity nombrePresentacion y media.
 
                         AcabarActivity.startActivity(CalificacionActivity.this,
                                                      nombrePresentacion,
@@ -148,6 +148,7 @@ public class CalificacionActivity extends AppCompatActivity {
     }
 
     private void empezarEscuchar(){
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         Query query = db.collection("presentaciones").document(idPresentacion).collection("calificaciones");
@@ -162,9 +163,7 @@ public class CalificacionActivity extends AppCompatActivity {
                         }
 
                         List<Calificacion> calificaciones = new ArrayList<>();
-                        Log.d("!!!", "Aqui si llegamos no");
                         for (QueryDocumentSnapshot doc : value) {
-                            Log.d("!!!", "Por lo menos aqui llegamos");
                             Log.d("!!!", doc.toString());
                             if (doc.get("calificacion") != null) {
                                 Calificacion nota = new Calificacion(doc.getString("nombre_alumno"),doc.getLong("calificacion"));
@@ -232,12 +231,12 @@ public class CalificacionActivity extends AppCompatActivity {
 
         BluetoothLeAdvertiser advertiser = BluetoothAdapter.getDefaultAdapter().getBluetoothLeAdvertiser();
 
-        AdvertisingSetParameters parameters = (new AdvertisingSetParameters.Builder())
+        AdvertisingSetParameters parameters = (new AdvertisingSetParameters.Builder()
                 .setLegacyMode(true) // True by default, but set here as a reminder.
                 .setConnectable(false).setScannable(true)
                 .setInterval(AdvertisingSetParameters.INTERVAL_HIGH)
                 .setTxPowerLevel(AdvertisingSetParameters.TX_POWER_MEDIUM)
-                .build();
+                .build());
 
 
 

@@ -28,7 +28,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user==null){
-            openAuthenticationActivity(null);
+            Intent intentSignIn = new Intent(this, AuthenticationActivity.class);
+            startActivity(intentSignIn);
             finish();
         } else {
             FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
                                 //lanzar activity profesor
                                 String name = documentSnapshot.getString("nombre");
                                 ProfesorActivity.startActivity(MainActivity.this, name);
+                                finish();
                             } else{
 
                                 FirebaseFirestore db2 = FirebaseFirestore.getInstance();
@@ -54,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
                                                     //lanzar activity alumno
                                                     String name2 = documentSnapshot.getString("nombre");
                                                     AlumnoScanActivity.startActivity(MainActivity.this, name2);
+                                                    finish();
                                                 } else{
                                                     throw new IllegalStateException();
                                                 }
@@ -74,31 +77,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void signOut (View view){
         FirebaseAuth.getInstance().signOut();
-        openAuthenticationActivity(null);
+        Intent intentSignIn = new Intent(this, AuthenticationActivity.class);
+        startActivity(intentSignIn);
         finish();
     }
 
-    public void openAuthenticationActivity (View view){
-        Intent intentSignIn = new Intent(this, AuthenticationActivity.class);
-        startActivity(intentSignIn);
 
-    }
 
-    public void leerAsignatura (View view){
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("asignaturas")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d("!!!", document.getId() + " => " + document.getData());
-                            }
-                        } else {
-                            Log.w("!!!", "Error getting documents.", task.getException());
-                        }
-                    }
-                });
-    }
+
 }

@@ -1,12 +1,17 @@
 package com.example.myapplication;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -47,9 +52,11 @@ public class ProfesorActivity extends AppCompatActivity {
 
 
         String name = getIntent().getStringExtra(EXTRA_NAME);
+
         mainContainer = findViewById(R.id.asignaturas_container);
         TextView nameText = findViewById(R.id.teacher_name);
-        nameText.setText(name);
+        setTitle(name);
+        nameText.setText("Asignaturas");
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user==null){
             startActivity(new Intent(this,AuthenticationActivity.class));
@@ -90,9 +97,6 @@ public class ProfesorActivity extends AppCompatActivity {
                 @Override
                 public void onAsignaturaClick(Asignatura asignatura) {
 
-                //Intent intentPresentacionActivity = new Intent(ProfesorActivity.this, PresentacionActivity.class);
-                //intentPresentacionActivity.putExtra("Id asignatura", asignatura.id).putExtra("nombre",asignatura.name);
-                //startActivity(intentPresentacionActivity);
                     PresentacionActivity.startActivity(ProfesorActivity.this,asignatura.id,asignatura.name);
                 }
             });
@@ -100,10 +104,43 @@ public class ProfesorActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_actionlogout,menu);
+        return true;
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId()==R.id.action_logout){
+            showLogOutDialog();
+        }
+        return true;
+    }
 
+    private void showLogOutDialog(){
+        new AlertDialog.Builder(this)
+                .setMessage("¿Quieres cerrar sesión?")
+                .setPositiveButton("Cerrar sesión", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        signOut();
+                    }
+                })
+                .setNegativeButton("Volver", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
+    }
 
-
-
-
+    public void signOut (){
+        FirebaseAuth.getInstance().signOut();
+        Intent intentSignIn = new Intent(this, AuthenticationActivity.class);
+        startActivity(intentSignIn);
+        finish();
+    }
 }

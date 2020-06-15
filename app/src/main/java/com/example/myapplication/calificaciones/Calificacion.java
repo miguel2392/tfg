@@ -8,5 +8,4 @@ public class Calificacion {
         this.nombreAlumno = nombreAlumno;
         this.nota = nota;
     }
-
 }

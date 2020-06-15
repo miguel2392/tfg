@@ -5,7 +5,7 @@
     <string name="buttonA">Open activity A</string>
     <string name="buttonB">Open activity B</string>
     <string name="buttonC">Open Authentication Activity</string>
-    <string name="button3">FIND DEVICE</string>
+    <string name="button3">Buscar presentación</string>
     <string name="button4">Start Advertising</string>
     <string name="buttonSalir">Salir</string>
     <string name="buttonEmpezarEscuchar">Empezar a escuchar</string>
@@ -29,6 +29,7 @@
     <string name="subirnotabutton">Mandar calificación </string>
     <string name="leerasignatura">Leer asignatura </string>
     <string name="calificacion">Introducir calificación</string>
+    <string name="logout">Logout </string>
 
 
 </resources>

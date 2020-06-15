@@ -14,37 +14,12 @@
         android:layout_marginTop="16dp"
         android:text="@string/emailSignInButton"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@+id/fieldPassword"/>
 
-    <Button
-        android:id="@+id/emailCreateAccountButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:text="@string/emailCreateAccountButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/emailSignInButton" />
 
-    <Button
-        android:id="@+id/signOutButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:text="@string/signOutButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/emailCreateAccountButton" />
 
-    <Button
-        android:id="@+id/verifyEmailButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:text="@string/verifyEmailButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/signOutButton" />
+
+
 
     <TextView
         android:id="@+id/status"
@@ -52,7 +27,7 @@
         android:layout_height="wrap_content"
         android:text="@string/status"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/verifyEmailButton" />
+        app:layout_constraintTop_toBottomOf="@+id/emailSignInButton" />
 
     <TextView
         android:id="@+id/detail"
@@ -70,7 +45,7 @@
         android:hint="@string/email"
         android:inputType="textEmailAddress"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/detail" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/fieldPassword"

@@ -58,9 +58,10 @@ public class AlumnoActivity extends AppCompatActivity {
 
         recibirDatos();
 
+        setTitle(nombreAlumno);
+
         et1 = findViewById(R.id.editTextNota);
         Button subirNota = findViewById(R.id.subirnota);
-
         subirNota.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -84,7 +85,9 @@ public class AlumnoActivity extends AppCompatActivity {
                 .setCancelable(false)
                 .show();
     }
+
     private void subirNota(int nota, String name){
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         idAlumno = user.getUid();

@@ -45,6 +45,7 @@ public class PresentacionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_presentacion);
 
         recibirDatos();
+        setTitle(name);
 
         et1 = findViewById(R.id.editTextTitulo);
 
@@ -72,27 +73,27 @@ public class PresentacionActivity extends AppCompatActivity {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String idProfesor = user.getUid();
 
+        String idProfesor = user.getUid();
         Map<String, Object> presentation = new HashMap<>();
         presentation.put("nombre asignatura", name);
         presentation.put("id_asignatura",idAsignatura);
         presentation.put("nombre presentación",nombrePresentacion);
         presentation.put("owner",idProfesor);
         presentation.put("isFinished",false);
-        AutoId generador = new AutoId();
 
+        AutoId generador = new AutoId();
         idPresentacion = generador.autoId(20);
+
         db.collection("presentaciones").document(idPresentacion).set(presentation)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
                     Log.d("¡¡¡", "DocumentSnapshot successfully written!");
 
-                    // TODO intent a CalificacionActivity
                     CalificacionActivity.startActivity(PresentacionActivity.this,idAsignatura,idPresentacion,nombrePresentacion);
                     finish();
-                    // TODO Mandar por ble trama adverstising con idAsignatura y idPresentacion en calificacion activity
+
                 }
         })
                 .addOnFailureListener(new OnFailureListener() {

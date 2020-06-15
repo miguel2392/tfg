@@ -18,7 +18,6 @@
         <activity android:name=".AlumnoActivity" />
         <activity android:name=".calificaciones.CalificacionActivity" />
         <activity android:name=".ProfesorActivity" />
-        <activity android:name=".DiferenciacionActivity" />
         <activity android:name=".AuthenticationActivity" />
         <activity android:name=".ActivityB" />
         <activity android:name=".AlumnoScanActivity" />
