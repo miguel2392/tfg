@@ -1,6 +1,9 @@
 package com.example.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 /**
@@ -11,13 +14,19 @@ import android.os.Bundle;
  */
 public class MainActivity extends AppCompatActivity {
 
+    public static void startActivity(Context context) {
+        Intent intentMain = new Intent(context, MainActivity.class);
+        context.startActivity(intentMain);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        final AppAuthManager appAuthManager = new AppAuthManager();
         final AppDatabaseManager appDatabaseManager = new AppDatabaseManager();
         setContentView(R.layout.activity_main);
 
-        final String uuid = appDatabaseManager.getUserId();
+        final String uuid = appAuthManager.getUserId();
 
         if (uuid == null) {
             AuthenticationActivity.startActivity(this);
@@ -25,14 +34,14 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        appDatabaseManager.getProfessor(uuid, new AppDatabaseManager.ProfessorListener() {
+        appDatabaseManager.getProfessor(new AppDatabaseManager.ProfessorListener() {
             @Override
             public void onProfessorReceived(String name) {
                 if (name != null) {
                     ProfesorActivity.startActivity(MainActivity.this, name);
                     finish();
                 } else {
-                    appDatabaseManager.getAlumno(uuid, new AppDatabaseManager.AlumnoListener() {
+                    appDatabaseManager.getAlumno(new AppDatabaseManager.AlumnoListener() {
                         @Override
                         public void onAlumnoReceived(String name) {
                             if (name != null) {

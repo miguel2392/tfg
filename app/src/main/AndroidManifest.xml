@@ -19,7 +19,6 @@
         <activity android:name=".calificaciones.CalificacionActivity" />
         <activity android:name=".ProfesorActivity" />
         <activity android:name=".AuthenticationActivity" />
-        <activity android:name=".ActivityB" />
         <activity android:name=".AlumnoScanActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>

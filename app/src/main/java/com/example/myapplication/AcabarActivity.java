@@ -10,6 +10,9 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+/**
+ * Esta actividad muestra por pantalla la media de una presentación.
+ */
 public class AcabarActivity extends AppCompatActivity {
 
     private double media;

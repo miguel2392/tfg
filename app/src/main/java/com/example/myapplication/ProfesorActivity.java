@@ -1,6 +1,4 @@
 package com.example.myapplication;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -8,25 +6,17 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Actividad que muestra la lista de asignaturas de un profesor. Si se clica sobre una asignatura se
+ * lanza la {@link PresentacionActivity}
+ */
 public class ProfesorActivity extends AppCompatActivity {
 
     private static String EXTRA_NAME = "EXTRA_NAME";
@@ -43,43 +33,25 @@ public class ProfesorActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AppDatabaseManager appDatabaseManager = new AppDatabaseManager();
+        AppAuthManager appAuthManager = new AppAuthManager();
         setContentView(R.layout.activity_profesor);
-
-
-
         String name = getIntent().getStringExtra(EXTRA_NAME);
 
         mainContainer = findViewById(R.id.asignaturas_container);
         TextView nameText = findViewById(R.id.teacher_name);
         setTitle(name);
         nameText.setText("Asignaturas");
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user==null){
-            startActivity(new Intent(this,AuthenticationActivity.class));
+        String uuid = appAuthManager.getUserId();
+        if (uuid == null) {
+            startActivity(new Intent(this, AuthenticationActivity.class));
             finish();
         }
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("asignaturas").whereArrayContainsAny("profesores",Arrays.asList(user.getUid()))
-                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        appDatabaseManager.getAsignaturas(true, new AppDatabaseManager.AsiganturasListener() {
             @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    List<Asignatura> asignaturas = new LinkedList<>();
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        Asignatura asignatura = new Asignatura(
-                                document.getId(),
-                                document.getString("nombre"),
-                                (List<String>) document.get("alumnos"),
-                                (List<String>) document.get("profesores")
-                                );
-                        asignaturas.add(asignatura);
-                        Log.d("!!!", document.getId() + " => " + document.getData());
-                    }
-                    displayAsignaturas(asignaturas);
-                } else {
-                    Log.w("!!!", "Error getting documents.", task.getException());
-                }
+            public void onAsignaturasRecevied(List<Asignatura> asignaturas) {
+                displayAsignaturas(asignaturas);
             }
         });
     }
@@ -133,8 +105,9 @@ public class ProfesorActivity extends AppCompatActivity {
                 .show();
     }
 
-    public void signOut (){
-        FirebaseAuth.getInstance().signOut();
+    public void signOut() {
+        AppAuthManager appAuthManager = new AppAuthManager();
+        appAuthManager.signOut();
         Intent intentSignIn = new Intent(this, AuthenticationActivity.class);
         startActivity(intentSignIn);
         finish();

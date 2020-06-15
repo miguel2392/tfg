@@ -9,20 +9,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.HashMap;
-import java.util.Map;
-
+/**
+ * En esta actividad el alumno puede subir una nota a una presentación previamente escaneada.
+ */
 public class AlumnoActivity extends AppCompatActivity {
 
     private static String EXTRA_NAME = "EXTRA_NAME";
@@ -88,34 +80,17 @@ public class AlumnoActivity extends AppCompatActivity {
 
     private void subirNota(int nota, String name){
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        idAlumno = user.getUid();
-
-        Map<String, Object> calificacion = new HashMap<>();
-        calificacion.put("nombre_alumno", name);
-        calificacion.put("calificacion", nota);
-
-
-        db.collection("presentaciones").document(idPresentacion)
-                .collection("calificaciones").document(idAlumno).set(calificacion)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d("¡¡¡", "DocumentSnapshot successfully written!");
-                        showFinishDialog();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w("¡¡¡", "Error writing document", e);
-                        Toast.makeText(AlumnoActivity.this,"Error al enviar la calificación :(",Toast.LENGTH_LONG).show();
-                    }
-                });
-
+        AppDatabaseManager appDatabaseManager = new AppDatabaseManager();
+        appDatabaseManager.subirNota(idPresentacion, nota, name, new AppDatabaseManager.SubirNotaListener() {
+            @Override
+            public void onSubirNotaFinished(boolean success) {
+                if (success) {
+                    showFinishDialog();
+                } else {
+                    Toast.makeText(AlumnoActivity.this,"Error al enviar la calificación :(",Toast.LENGTH_LONG).show();
+                }
+            }
+        });
     }
-
-
-    }
+}
 

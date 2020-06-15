@@ -1,48 +1,34 @@
 package com.example.myapplication.calificaciones;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothManager;
-import android.bluetooth.le.AdvertiseData;
-import android.bluetooth.le.AdvertisingSet;
-import android.bluetooth.le.AdvertisingSetCallback;
-import android.bluetooth.le.AdvertisingSetParameters;
-import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.ParcelUuid;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.myapplication.AcabarActivity;
 import com.example.myapplication.AdvertisingDataHelper;
+import com.example.myapplication.AppBLEManager;
+import com.example.myapplication.AppDatabaseManager;
+
 import com.example.myapplication.R;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.annotations.Nullable;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
 
+/**
+ * En esta actividad el dispositivo comienza a realizar advertising BLE publicando el secreto para poder
+ * calificar la presentacion que acaba de crear.
+ */
 public class CalificacionActivity extends AppCompatActivity {
 
     private String idAsignatura;
@@ -51,9 +37,10 @@ public class CalificacionActivity extends AppCompatActivity {
     private ListenerRegistration listener;
     private CalificacionesListView calificacionesListView;
     private Handler handler;
-    private BluetoothAdapter bluetoothAdapter;
+    private AppBLEManager appBLEManager;
     static final int REQUEST_ENABLE_BT = 0;
-    private AdvertisingSet currentAdvertisingSet;
+
+    private AppDatabaseManager appDatabaseManager;
 
 
     public static void startActivity(Context context, String asignaturaID, String presentacionID, String nombrePresentacion) {
@@ -71,6 +58,8 @@ public class CalificacionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        appBLEManager = new AppBLEManager(this);
+        appDatabaseManager = new AppDatabaseManager();
         setContentView(R.layout.activity_calificacion);
 
         handler = new Handler(Looper.getMainLooper());
@@ -78,23 +67,12 @@ public class CalificacionActivity extends AppCompatActivity {
         recibirDatos();
         setTitle(nombrePresentacion);
 
-        // TODO mandar trama BLE con idAsignatura e idPresentacion
-
-        // Inicializacion Bluetooth Adapter
-        final BluetoothManager bluetoothManager =
-                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        bluetoothAdapter = bluetoothManager.getAdapter();
-
-        // Asegura que bluetooth esta activado, si no lo está, pide que se active
-
-        if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
+        if (appBLEManager.isActivated()) {
+            startAdvertising();
+        } else {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        } else {
-
-            startAdvertising();
         }
-
 
         // Boton acabar presentación
         Button acabarPresentacion = findViewById(R.id.buttonAcabarPresentacion);
@@ -106,6 +84,15 @@ public class CalificacionActivity extends AppCompatActivity {
         });
         //Automatically start listening to model updates.
         empezarEscuchar();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (appBLEManager.isActivated()) {
+            startAdvertising();
+        } else {
+            Toast.makeText(CalificacionActivity.this, "Bluetooth not activated", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -122,60 +109,29 @@ public class CalificacionActivity extends AppCompatActivity {
     }
 
     private void acabarPresentacion(){
-
-        listener.remove();
-        stopAdvertising();
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("presentaciones").document(idPresentacion).update("isFinished",true)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d("¡¡¡", "Field isFinished updated TRUE");
-
-                        AcabarActivity.startActivity(CalificacionActivity.this,
-                                                     nombrePresentacion,
-                                                     calificacionesListView.getMedia());
-                        finish();
-
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w("¡¡¡", "Error writing document", e);
-                    }
-                });
+        appBLEManager.stopAdvertising();
+        appDatabaseManager.stopPresentacion(idPresentacion, new AppDatabaseManager.StopPresentacionListener() {
+            @Override
+            public void onPresentacionFinished(boolean success) {
+                if (success) {
+                    AcabarActivity.startActivity(CalificacionActivity.this,
+                            nombrePresentacion,
+                            calificacionesListView.getMedia());
+                    finish();
+                } else {
+                    Toast.makeText(CalificacionActivity.this, "ERROR", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
     }
 
     private void empezarEscuchar(){
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        Query query = db.collection("presentaciones").document(idPresentacion).collection("calificaciones");
-
-                listener = query.addSnapshotListener(new EventListener<QuerySnapshot>(){
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot value,
-                                        @Nullable FirebaseFirestoreException e) {
-                        if (e != null) {
-                            Log.w("!!!", "Listen failed.", e);
-                            return;
-                        }
-
-                        List<Calificacion> calificaciones = new ArrayList<>();
-                        for (QueryDocumentSnapshot doc : value) {
-                            Log.d("!!!", doc.toString());
-                            if (doc.get("calificacion") != null) {
-                                Calificacion nota = new Calificacion(doc.getString("nombre_alumno"),doc.getLong("calificacion"));
-                                calificaciones.add(nota);
-                                Log.d("!!!", "Notas " + calificaciones);
-
-                            }
-                        }
-                        displayData(calificaciones);
-                        //Log.d("!!!", "Notas " + calificaciones);
-                    }
-                });
+        appDatabaseManager.listenCalificaciones(idPresentacion, new AppDatabaseManager.CalificacionesListener() {
+            @Override
+            public void onCalificacionesupdate(List<Calificacion> listaCalificaciones) {
+                displayData(listaCalificaciones);
+            }
+        });
     }
 
     private void displayData(final List<Calificacion> listaCalificaciones){
@@ -185,23 +141,6 @@ public class CalificacionActivity extends AppCompatActivity {
                 calificacionesListView.setCalificaciones(listaCalificaciones);
             }
         });
-    }
-
-    private void leerDatos(){
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("presentaciones").document(idPresentacion).collection("calificaciones").get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>(){
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()){
-                            Log.d("!!!", "GET COMPLETADO");
-                        }
-                        else {
-                            Log.w("!!!", "Error getting documents.", task.getException());
-                        }
-                    }
-
-                    });
     }
 
     private void showFinishDialog() {
@@ -224,73 +163,8 @@ public class CalificacionActivity extends AppCompatActivity {
     }
 
     private void startAdvertising(){
-
-
         String idConcatenado = AdvertisingDataHelper.generateDeviceName(idAsignatura,idPresentacion);
-        bluetoothAdapter.setName(idConcatenado);
-
-        BluetoothLeAdvertiser advertiser = BluetoothAdapter.getDefaultAdapter().getBluetoothLeAdvertiser();
-
-        AdvertisingSetParameters parameters = (new AdvertisingSetParameters.Builder()
-                .setLegacyMode(true) // True by default, but set here as a reminder.
-                .setConnectable(false).setScannable(true)
-                .setInterval(AdvertisingSetParameters.INTERVAL_HIGH)
-                .setTxPowerLevel(AdvertisingSetParameters.TX_POWER_MEDIUM)
-                .build());
-
-
-
-
-
-
-
-        advertiser.startAdvertisingSet(parameters, null, null, null, null, callback);
-
-        //advertiser.startAdvertisingSet(parameters, data, null, null, null, callback);
-
+        appBLEManager.startAdvertising(idConcatenado);
     }
 
-    private void onAdvertisingStart(){
-        // After onAdvertisingSetStarted callback is called, you can modify the
-        // advertising data and scan response data:
-        currentAdvertisingSet.setAdvertisingData(new AdvertiseData.Builder().
-                setIncludeDeviceName(true).setIncludeTxPowerLevel(true).build());
-        // Wait for onAdvertisingDataSet callback...
-        currentAdvertisingSet.setScanResponseData(new
-                AdvertiseData.Builder().addServiceUuid(new ParcelUuid(UUID.randomUUID())).build());
-        // Wait for onScanResponseDataSet callback...
-    }
-
-    private void stopAdvertising(){
-
-        BluetoothLeAdvertiser advertiser = BluetoothAdapter.getDefaultAdapter().getBluetoothLeAdvertiser();
-        advertiser.stopAdvertisingSet(callback);
-    }
-
-    private AdvertisingSetCallback callback = new AdvertisingSetCallback() {
-        @Override
-        public void onAdvertisingSetStarted(AdvertisingSet advertisingSet, int txPower, int status) {
-            //Log.i(LOG_TAG, "onAdvertisingSetStarted(): txPower:" + txPower + " , status: "
-            //      + status);
-            currentAdvertisingSet = advertisingSet;
-            onAdvertisingStart();
-        }
-
-        @Override
-        public void onAdvertisingDataSet(AdvertisingSet advertisingSet, int status) {
-            //Log.i(LOG_TAG, "onAdvertisingDataSet() :status:" + status);
-        }
-
-        @Override
-        public void onScanResponseDataSet(AdvertisingSet advertisingSet, int status) {
-            // Log.i(LOG_TAG, "onScanResponseDataSet(): status:" + status);
-        }
-
-        @Override
-        public void onAdvertisingSetStopped(AdvertisingSet advertisingSet) {
-            // Log.i(LOG_TAG, "onAdvertisingSetStopped():");
-        }
-
-
-    };
 }
