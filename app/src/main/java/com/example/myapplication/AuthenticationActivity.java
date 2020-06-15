@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -20,7 +21,9 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 
-
+/**
+ * Actividad en la que un usuario se puede logear.
+ */
 public class AuthenticationActivity extends AppCompatActivity implements View.OnClickListener{
 
     private static final String TAG = "!!!";
@@ -33,6 +36,11 @@ public class AuthenticationActivity extends AppCompatActivity implements View.On
     // [START declare_auth]
     private FirebaseAuth mAuth;
     // [END declare_auth]
+
+    public static void startActivity(Context context) {
+        Intent intent = new Intent(context, AuthenticationActivity.class);
+        context.startActivity(intent);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
